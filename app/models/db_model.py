@@ -9,8 +9,8 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
 class DateTimeModelMixin(BaseModel):
-    created_at: Optional[datetime]
-    updated_at: Optional[datetime]
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
 
 
 class DBModelMixin(DateTimeModelMixin):
