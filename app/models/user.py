@@ -34,3 +34,13 @@ class UserForLogin(RWModel):
 
 class UserForResponse(RWModel):
     user: User
+
+
+class UserForCreate(UserForLogin):
+    name: str
+
+
+class UserForUpdate(RWModel):
+    email: EmailStr | None = None
+    password: str | None = None
+    name: str | None = None
