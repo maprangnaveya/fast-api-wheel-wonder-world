@@ -1,4 +1,5 @@
 import os
+from functools import lru_cache
 
 from pydantic_settings import BaseSettings
 
@@ -23,3 +24,14 @@ class Settings(BaseSettings):
     mongo_db: str = os.getenv("MONGO_DATABASE", "wheel_db")
 
     mongodb_url: str = f"mongodb://{mongo_user}:{mongo_pass}@mongodb:{mongo_port}"
+
+    # MongoDB collections
+    users_collection_name: str = "users"
+
+
+settings = Settings()
+
+
+@lru_cache
+def get_settings():
+    return settings
