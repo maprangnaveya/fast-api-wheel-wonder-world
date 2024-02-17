@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from .config import Settings
-from .utils import init_mongo
+from db.mongodb_utils import connect_to_mongodb, disconnect_mongodb
 
 settings = Settings()
 
@@ -10,12 +10,12 @@ settings = Settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # start up
-    app.state.mongo_client, app.state.mongo_db = await init_mongo(
-        settings.mongo_db,
-        settings.mongodb_url,
-    )
+    await connect_to_mongodb(settings.mongodb_url)
+
     yield
+
     # shutdown
+    await disconnect_mongodb()
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
