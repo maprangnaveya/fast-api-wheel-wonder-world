@@ -1,10 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from .config import Settings
 from db.mongodb_utils import connect_to_mongodb, disconnect_mongodb
 
-settings = Settings()
+from .core.global_settings import settings
 
 
 @asynccontextmanager
