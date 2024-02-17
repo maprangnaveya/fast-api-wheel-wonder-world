@@ -23,7 +23,7 @@ app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return {"message": f"Hello World! I'm {settings.app_name}"}
 
 
 @app.get("/items/{item_id}")
