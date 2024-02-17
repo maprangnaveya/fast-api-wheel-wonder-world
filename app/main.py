@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from db.mongodb_utils import connect_to_mongodb, disconnect_mongodb
-
+from .api.api_v1.api import router as api_router
 from .core.global_settings import settings
+from .db.mongodb_utils import connect_to_mongodb, disconnect_mongodb
 
 
 @asynccontextmanager
@@ -28,3 +28,6 @@ def root():
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}
+
+
+app.include_router(api_router, prefix="/api/v1")
