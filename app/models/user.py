@@ -12,7 +12,7 @@ class BaseUser(RWModel):
     disabled: bool = Field(default=False)
 
 
-class UserForDB(DBModelMixin, BaseUser):
+class UserInDB(DBModelMixin, BaseUser):
     salt: str = ""
     hashed_password: str = ""
 
