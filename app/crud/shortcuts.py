@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 
@@ -15,4 +16,14 @@ async def check_is_email_does_exists(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with this email already exists",
+        )
+
+
+def get_bson_object_id(object_id) -> ObjectId:
+    try:
+        return ObjectId(object_id)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Object id is invalid",
         )

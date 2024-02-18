@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # MongoDB collections
     users_collection_name: str = "users"
     brokers_collection_name: str = "brokers"
+    cars_collection_name: str = "cars"
 
     jwt_secret_key: str = os.getenv(
         "SECRET_KEY", "03850f6de136cbfbac0ffb32e35cfde826d262c5d117331de42e418ddf7b02ea"
