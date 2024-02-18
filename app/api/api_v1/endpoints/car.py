@@ -37,8 +37,13 @@ async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarFor
         )
 
 
-@router.get("/cars", response_model=list[CarOut], tags=tags)
-async def get_all_cars(
+@router.get(
+    "/cars",
+    response_model=list[CarOut],
+    tags=tags,
+    description="Get All Cars by Status, Broker Id",
+)
+async def get_all_cars_by_status_broker_id(
     status: Status = None,
     broker_id: str = None,
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
