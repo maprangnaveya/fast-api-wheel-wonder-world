@@ -92,5 +92,11 @@ async def delete_car_by_id(
     # TODO: Is staff or broker user
     await check_is_owner_car(db, current_user=current_user, current_car=current_car)
 
-    await delete_car(db, car_id)
-    return Response(status_code=204)
+    deleted_count = await delete_car(db, car_id)
+    if deleted_count == 1:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Car not found",
+    )
