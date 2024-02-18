@@ -27,3 +27,11 @@ def get_bson_object_id(object_id) -> ObjectId:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Object id is invalid",
         )
+
+
+def get_total_skip_from_page_number(*, page, page_size):
+    skip = (page - 1) * page_size
+    if skip < 0:
+        return 0
+
+    return skip

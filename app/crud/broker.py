@@ -23,10 +23,12 @@ async def get_broker(connection: AsyncIOMotorClient, broker_id: str, raise_excep
         )
 
 
-async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> list[BrokerForDB]:  # type: ignore
+async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str, skip: int = 0, limit: int = 0) -> list[BrokerForDB]:  # type: ignore
     rows = (
         await connection[settings.mongo_db][settings.brokers_collection_name]
         .find({"user_id": ObjectId(user_id)})
+        .skip(skip)
+        .limit(limit)
         .to_list(length=None)
     )
     return [BrokerForDB(**broker) for broker in rows]

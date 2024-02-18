@@ -1,15 +1,8 @@
-from typing import Annotated
-
-from bson import ObjectId
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 
+from core.global_settings import settings
 from core.oauth import get_current_user_for_db
-from crud.broker import (
-    create_broker,
-    get_broker,
-    get_brokers_for_user,
-    update_broker_with_db_broker,
-)
+from crud.broker import get_brokers_for_user
 from crud.car import (
     create_car_for_broker,
     delete_car,
@@ -17,7 +10,7 @@ from crud.car import (
     get_cars,
     update_car_with_db_car,
 )
-from crud.shortcuts import get_bson_object_id
+from crud.shortcuts import get_bson_object_id, get_total_skip_from_page_number
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.car import CarForDB, CarIn, CarInUpdate, CarOut, Status
 from models.user import UserForDB
@@ -46,6 +39,8 @@ async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarFor
 async def get_all_cars_by_status_broker_id(
     status: Status = None,
     broker_id: str = None,
+    page: int = 1,
+    page_size: int = settings.default_page_size,
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     query = {}
@@ -55,7 +50,12 @@ async def get_all_cars_by_status_broker_id(
     if broker_id:
         query["broker_id"] = get_bson_object_id(broker_id)
 
-    cars = await get_cars(db, query=query)
+    cars = await get_cars(
+        db,
+        query=query,
+        skip=get_total_skip_from_page_number(page=page, page_size=page_size),
+        limit=page_size,
+    )
     return [CarOut(**car.model_dump()) for car in cars]
 
 

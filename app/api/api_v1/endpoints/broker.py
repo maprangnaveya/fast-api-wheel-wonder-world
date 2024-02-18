@@ -1,8 +1,7 @@
-from typing import Annotated
-
 from bson import ObjectId
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
+from core.global_settings import settings
 from core.oauth import get_current_user_for_db
 from crud.broker import (
     create_broker,
@@ -10,6 +9,7 @@ from crud.broker import (
     get_brokers_for_user,
     update_broker_with_db_broker,
 )
+from crud.shortcuts import get_total_skip_from_page_number
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.broker import BrokerForUpdate, BrokerIn, BrokerOut
 from models.user import UserForDB
@@ -21,10 +21,17 @@ tags = ["broker"]
 
 @router.get("/brokers/me", response_model=list[BrokerOut], tags=tags)
 async def get_brokers_for_request_user(
-    current_user: Annotated[UserForDB, Depends(get_current_user_for_db)],
+    page: int = 1,
+    page_size: int = settings.default_page_size,
+    current_user: UserForDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
-    brokers = await get_brokers_for_user(db, current_user.id)
+    brokers = await get_brokers_for_user(
+        db,
+        current_user.id,
+        skip=get_total_skip_from_page_number(page=page, page_size=page_size),
+        limit=page_size,
+    )
     return [BrokerOut(**broker.model_dump()) for broker in brokers]
 
 
