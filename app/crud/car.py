@@ -26,20 +26,17 @@ async def get_car(connection: AsyncIOMotorClient, car_id: str, raise_exception: 
         )
 
 
-async def get_cars(connection: AsyncIOMotorClient, query: dict | None = None, skip: int = 0, limit: int | None = None) -> list[CarForDB]:  # type: ignore
+async def get_cars(connection: AsyncIOMotorClient, query: dict | None = None, skip: int = 0, limit: int = 0) -> list[CarForDB]:  # type: ignore
     if query is None:
         query = {}
 
-    if limit is None:
-        rows = await get_collection_cars(connection).find(query).to_list(length=None)
-    else:
-        rows = (
-            await get_collection_cars(connection)
-            .find(query)
-            .skip(skip)
-            .limit(limit)
-            .to_list(length=None)
-        )
+    rows = (
+        await get_collection_cars(connection)
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .to_list(length=None)
+    )
 
     return [CarForDB(**car) for car in rows]
 
