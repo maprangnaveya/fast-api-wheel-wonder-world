@@ -21,6 +21,12 @@ router = APIRouter()
 tags = ["car"]
 
 
+@router.get("/cars", response_model=list[CarOut], tags=tags)
+async def get_all_cars(
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+):
+    cars = await get_cars(db)
+    return [CarOut(**car.model_dump()) for car in cars]
 @router.post("/cars", response_model=CarOut, tags=tags)
 async def create_new_car(
     car: CarIn = Body(embed=True),

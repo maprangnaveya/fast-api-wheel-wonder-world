@@ -15,6 +15,10 @@ def get_collection_cars(connection: AsyncIOMotorClient):  # type: ignore
     return connection[settings.mongo_db][settings.cars_collection_name]
 
 
+async def get_cars(connection: AsyncIOMotorClient) -> list[CarForDB]:  # type: ignore
+    rows = await get_collection_cars(connection).find({}).to_list(length=None)
+    return [CarForDB(**car) for car in rows]
+
 
 async def get_cars_for_broker(connection: AsyncIOMotorClient, broker_id: str) -> list[CarForDB]:  # type: ignore
     rows = (
