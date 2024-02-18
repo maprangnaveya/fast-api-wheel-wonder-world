@@ -43,6 +43,7 @@ async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # ty
             detail="Broker's user does not found",
         )
 
+    broker.user_id = ObjectId(user.id)
     broker.emails = list(broker.emails)
     broker.mobile_phones = list(broker.mobile_phones)
     broker.branches = list(broker.branches)
