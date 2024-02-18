@@ -4,32 +4,32 @@ from pydantic import EmailStr
 
 from core.global_settings import settings
 from db.mongodb import AsyncIOMotorClient
-from models.user import UserForDB, UserForCreate, UserForUpdate
+from models.user import UserInDB, UserForCreate, UserForUpdate
 
 
-async def get_user_by_id(connection: AsyncIOMotorClient, id: str) -> UserForDB:  # type: ignore
+async def get_user_by_id(connection: AsyncIOMotorClient, id: str) -> UserInDB:  # type: ignore
     row = await connection[settings.mongo_db][settings.users_collection_name].find_one(
         {"_id": ObjectId(id)}
     )
     print(f">>> get_user row: {row}")
     if row:
-        return UserForDB(**row)
+        return UserInDB(**row)
 
 
-async def get_user(connection: AsyncIOMotorClient, email: EmailStr) -> UserForDB:  # type: ignore
+async def get_user(connection: AsyncIOMotorClient, email: EmailStr) -> UserInDB:  # type: ignore
     row = await connection[settings.mongo_db][settings.users_collection_name].find_one(
         {"email": email}
     )
     print(f">>> get_user row: {row}")
     if row:
-        return UserForDB(**row)
+        return UserInDB(**row)
 
 
-async def create_user(connection: AsyncIOMotorClient, user: UserForCreate) -> UserForDB:  # type: ignore
+async def create_user(connection: AsyncIOMotorClient, user: UserForCreate) -> UserInDB:  # type: ignore
     """
     A unique `id` will be created and provided in the response.
     """
-    db_user = UserForDB(
+    db_user = UserInDB(
         **user.model_dump(),
     )
     # hash password
@@ -42,10 +42,10 @@ async def create_user(connection: AsyncIOMotorClient, user: UserForCreate) -> Us
     )
     created_user = await collection.find_one({"_id": new_user.inserted_id})
 
-    return UserForDB(**created_user)
+    return UserInDB(**created_user)
 
 
-async def update_user(connection: AsyncIOMotorClient, email: EmailStr, user: UserForUpdate) -> UserForDB:  # type: ignore
+async def update_user(connection: AsyncIOMotorClient, email: EmailStr, user: UserForUpdate) -> UserInDB:  # type: ignore
     db_user = await get_user(connection, email)
 
     db_user.name = user.name or db_user.name

@@ -24,7 +24,7 @@ class BaseBrokerWithUser(BaseBroker):
     user_id: PyObjectId = Field(...)
 
 
-class BrokerForDB(DBModelMixin, BaseBrokerWithUser):
+class BrokerInDB(DBModelMixin, BaseBrokerWithUser):
     pass
 
 

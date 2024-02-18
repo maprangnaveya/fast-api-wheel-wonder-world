@@ -12,7 +12,7 @@ from crud.broker import (
 from crud.shortcuts import get_total_skip_from_page_number
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.broker import BrokerForUpdate, BrokerIn, BrokerOut
-from models.user import UserForDB
+from models.user import UserInDB
 
 router = APIRouter()
 
@@ -23,7 +23,7 @@ tags = ["broker"]
 async def get_brokers_for_request_user(
     page: int = 1,
     page_size: int = settings.default_page_size,
-    current_user: UserForDB = Depends(get_current_user_for_db),
+    current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     brokers = await get_brokers_for_user(
@@ -47,7 +47,7 @@ async def get_broker_by_id(
 @router.post("/brokers", response_model=BrokerOut, tags=tags)
 async def create_new_broker(
     broker: BrokerIn = Body(embed=True),
-    current_user: UserForDB = Depends(get_current_user_for_db),
+    current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     if not broker.user_id:
@@ -64,7 +64,7 @@ async def create_new_broker(
 async def update_broker_by_id(
     broker_id: str,
     updated_broker: BrokerForUpdate = Body(embed=True),
-    current_user: UserForDB = Depends(get_current_user_for_db),
+    current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     current_broker = await get_broker(db, broker_id, raise_exception=True)

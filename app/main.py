@@ -25,9 +25,4 @@ def root():
     return {"message": f"Hello World! I'm {settings.app_name}"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
-
-
 app.include_router(api_router, prefix="/api/v1")

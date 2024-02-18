@@ -12,15 +12,15 @@ from crud.car import (
 )
 from crud.shortcuts import get_bson_object_id, get_total_skip_from_page_number
 from db.mongodb import get_database, AsyncIOMotorClient
-from models.car import CarForDB, CarIn, CarInUpdate, CarOut, Status
-from models.user import UserForDB
+from models.car import CarInDB, CarIn, CarInUpdate, CarOut, Status
+from models.user import UserInDB
 
 router = APIRouter()
 
 tags = ["car"]
 
 
-async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarForDB):
+async def check_is_owner_car(db, *, current_user: UserInDB, current_car: CarInDB):
     brokers_of_user = await get_brokers_for_user(db, current_user.id)
     brokers_id_of_user = [broker.id for broker in brokers_of_user]
     if current_car.broker_id not in brokers_id_of_user:
@@ -71,7 +71,7 @@ async def get_car_by_id(
 @router.post("/cars", response_model=CarOut, tags=tags)
 async def create_new_car(
     car: CarIn = Body(embed=True),
-    current_user: UserForDB = Depends(get_current_user_for_db),
+    current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
 
@@ -86,7 +86,7 @@ async def create_new_car(
 async def update_car_by_id(
     car_id: str,
     car_update: CarInUpdate = Body(embed=True),
-    current_user: UserForDB = Depends(get_current_user_for_db),
+    current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     # TODO: Is staff or broker user
@@ -100,7 +100,7 @@ async def update_car_by_id(
 @router.delete("/cars/{car_id}", tags=tags, status_code=204)
 async def delete_car_by_id(
     car_id: str,
-    current_user: UserForDB = Depends(get_current_user_for_db),
+    current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     current_car = await get_car(db, car_id, raise_exception=True)
