@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from bson import ObjectId
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from core.oauth import get_current_user_for_db
@@ -43,7 +44,7 @@ async def create_new_broker(
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     if not broker.user_id:
-        broker.user_id = current_user.id
+        broker.user_id = ObjectId(current_user.id)
 
     async with await db.start_session() as s:
         async with s.start_transaction():
@@ -59,8 +60,7 @@ async def update_broker_by_id(
     current_user: UserForDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
-    current_broker = await get_broker(db, broker_id)
-
+    current_broker = await get_broker(db, broker_id, raise_exception=True)
     if current_broker.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -3,22 +3,22 @@ from bson import ObjectId
 from fastapi import HTTPException, status
 
 from core.global_settings import settings
+from crud.shortcuts import get_bson_object_id
 from crud.user import get_user_by_id
 from db.mongodb import AsyncIOMotorClient
 from models.broker import BrokerForDB, BrokerIn, BrokerForUpdate
 
 
-async def get_broker(connection: AsyncIOMotorClient, broker_id: str) -> BrokerForDB:  # type: ignore
-    try:
-        row = await connection[settings.mongo_db][
-            settings.brokers_collection_name
-        ].find_one({"_id": ObjectId(broker_id)})
-        print(f">>> get_broker row: {row}")
-        if row:
-            return BrokerForDB(**row)
-    except Exception:
+async def get_broker(connection: AsyncIOMotorClient, broker_id: str, raise_exception: bool = False) -> BrokerForDB:  # type: ignore
+    row = await connection[settings.mongo_db][
+        settings.brokers_collection_name
+    ].find_one({"_id": get_bson_object_id(broker_id)})
+    print(f">>> get_broker row: {row}")
+    if row:
+        return BrokerForDB(**row)
+    elif raise_exception:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Broker does not found",
         )
 
@@ -32,8 +32,8 @@ async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> 
     return [BrokerForDB(**broker) for broker in rows]
 
 
-async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # type: ignore
-    user = await get_user_by_id(connection, broker.user_id)
+async def create_broker(connection: AsyncIOMotorClient, broker_in: BrokerIn):  # type: ignore
+    user = await get_user_by_id(connection, broker_in.user_id)
 
     if not user:
         raise HTTPException(
@@ -41,6 +41,7 @@ async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # ty
             detail="Broker's user does not found",
         )
 
+    broker = BrokerForDB(**broker_in.model_dump())
     broker.user_id = ObjectId(user.id)
     broker.emails = list(broker.emails)
     broker.mobile_phones = list(broker.mobile_phones)
@@ -61,9 +62,11 @@ async def update_broker_with_db_broker(connection: AsyncIOMotorClient, broker: B
     db_broker.mobile_phones = list(broker.mobile_phones or db_broker.mobile_phones)
     db_broker.branches = list(broker.branches or db_broker.branches)
     db_broker.updated_at = datetime.utcnow()
+    db_broker.user_id = ObjectId(db_broker.id)
 
     await connection[settings.mongo_db][settings.brokers_collection_name].update_one(
-        {"id": db_broker.id}, {"$set": db_broker.model_dump()}
+        {"_id": ObjectId(db_broker.id)},
+        {"$set": db_broker.model_dump(by_alias=True, exclude=["id", "user_id"])},
     )
     print(f">> updated db_broker: {db_broker}")
     return db_broker
