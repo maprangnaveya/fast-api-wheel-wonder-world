@@ -9,12 +9,12 @@ from .db.mongodb_utils import connect_to_mongodb, disconnect_mongodb
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # start up
-    await connect_to_mongodb(settings.mongodb_url)
+    connect_to_mongodb(settings.mongodb_url)
 
     yield
 
     # shutdown
-    await disconnect_mongodb()
+    # await disconnect_mongodb()
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
