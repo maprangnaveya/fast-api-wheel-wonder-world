@@ -33,7 +33,7 @@ class BrokerOut(BaseBroker):
 
 
 class BrokerIn(BaseBrokerWithUser):
-    pass
+    user_id: PyObjectId | None = Field(default=None)
 
 
 class BrokerForUpdate(BaseBroker):
