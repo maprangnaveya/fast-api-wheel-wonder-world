@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
-from fastapi import HTTPException, status
 from jose import JWTError, jwt
 
 from models.jwttoken import TokenData
 
-# from app.main import TokenData
 from .global_settings import settings
 
 SECRET_KEY = settings.jwt_secret_key

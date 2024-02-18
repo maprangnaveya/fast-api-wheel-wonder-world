@@ -1,6 +1,4 @@
-from bson import ObjectId
 from pydantic import EmailStr
-from datetime import datetime
 
 from core.global_settings import settings
 from db.mongodb import AsyncIOMotorClient

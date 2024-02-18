@@ -1,14 +1,10 @@
-from datetime import timedelta
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
-from fastapi.params import Header
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import EmailStr
 
 from core.jwttoken import verify_token
 from crud.user import get_user
 from db.mongodb import get_database, AsyncIOMotorClient
-from core.global_settings import settings
 from models.user import User
 
 
