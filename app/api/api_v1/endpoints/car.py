@@ -27,6 +27,17 @@ async def get_all_cars(
 ):
     cars = await get_cars(db)
     return [CarOut(**car.model_dump()) for car in cars]
+
+
+@router.get("/cars/{car_id}", response_model=CarOut, tags=tags)
+async def get_car_by_id(
+    car_id: str,
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+):
+    car = await get_car(db, car_id, raise_exception=True)
+    return CarOut(**car.model_dump())
+
+
 @router.post("/cars", response_model=CarOut, tags=tags)
 async def create_new_car(
     car: CarIn = Body(embed=True),

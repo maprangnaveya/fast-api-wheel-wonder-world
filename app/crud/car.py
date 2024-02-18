@@ -15,6 +15,19 @@ def get_collection_cars(connection: AsyncIOMotorClient):  # type: ignore
     return connection[settings.mongo_db][settings.cars_collection_name]
 
 
+async def get_car(connection: AsyncIOMotorClient, car_id: str, raise_exception: bool = False) -> CarForDB:  # type: ignore
+    row = await get_collection_cars(connection).find_one(
+        {"_id": get_bson_object_id(car_id)}
+    )
+    if row:
+        return CarForDB(**row)
+    elif raise_exception:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Car does not found",
+        )
+
+
 async def get_cars(connection: AsyncIOMotorClient) -> list[CarForDB]:  # type: ignore
     rows = await get_collection_cars(connection).find({}).to_list(length=None)
     return [CarForDB(**car) for car in rows]
