@@ -38,6 +38,6 @@ async def update_user_is_staff_status(
     current_user: User = Depends(get_current_active_user),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
-    is_staff_user()
+    is_staff_user(current_user)
     updated_user = await update_user_is_staff(db, user_email, is_staff)
     return User(**updated_user.model_dump())
