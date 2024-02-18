@@ -30,3 +30,11 @@ class BrokerForDB(DBModelMixin, BaseBrokerWithUser):
 
 class BrokerOut(BaseBroker):
     pass
+
+
+class BrokerIn(BaseBrokerWithUser):
+    pass
+
+
+class BrokerForUpdate(BaseBroker):
+    pass
