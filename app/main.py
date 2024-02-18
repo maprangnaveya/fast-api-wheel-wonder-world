@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from .api.api_v1.api import router as api_router
-from .core.global_settings import settings
-from .db.mongodb_utils import connect_to_mongodb, disconnect_mongodb
+from api.api_v1.api import router as api_router
+from core.global_settings import settings
+from db.mongodb_utils import connect_to_mongodb
 
 
 @asynccontextmanager
