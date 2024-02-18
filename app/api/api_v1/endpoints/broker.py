@@ -60,7 +60,12 @@ async def create_new_broker(
             return BrokerOut(**db_broker.model_dump())
 
 
-@router.post("/brokers/{broker_id}", response_model=BrokerOut, tags=tags)
+@router.post(
+    "/brokers/{broker_id}",
+    response_model=BrokerOut,
+    tags=tags,
+    description="Allow only staff and car owner broker to do this action",
+)
 async def update_broker_by_id(
     broker_id: str,
     updated_broker: BrokerForUpdate = Body(embed=True),
@@ -68,7 +73,7 @@ async def update_broker_by_id(
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     current_broker = await get_broker(db, broker_id, raise_exception=True)
-    if current_broker.user_id != current_user.id:
+    if not current_user.is_staff and current_broker.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only owner broker can do this action",
