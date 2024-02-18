@@ -15,7 +15,6 @@ from models.user import User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
 
-
 async def get_current_user(
     db: AsyncIOMotorClient = Depends(get_database), token: str = Depends(oauth2_scheme)  # type: ignore
 ) -> User:
@@ -27,7 +26,7 @@ async def get_current_user(
     )
     token_data = verify_token(token, credentials_exception)
 
-    db_user = await get_user(db, token_data.email)
+    db_user = await get_user(db, token_data.user_email)
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -46,5 +45,3 @@ async def get_current_active_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
     return current_user
-
-
