@@ -31,7 +31,12 @@ async def update_my_user_info(
     return User(**updated_user.model_dump())
 
 
-@router.post("/profile/{user_email}/is_staff", tags=tags, response_model=User)
+@router.post(
+    "/profile/{user_email}/is_staff",
+    tags=tags,
+    response_model=User,
+    description="Allow only staff to do this action",
+)
 async def update_user_is_staff_status(
     user_email: EmailStr,
     is_staff: bool = Body(..., embed=True),
