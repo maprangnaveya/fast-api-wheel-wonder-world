@@ -15,7 +15,7 @@ class BranchForDB(DBModelMixin, BaseBranch):
 
 
 class BaseBroker(RWModel):
-    emails: set[str] = Field(default_factory=set)
+    emails: set[EmailStr] = Field(default_factory=set)
     mobile_phones: set[str] = Field(default_factory=set)
     branches: set[PyObjectId] = Field(default_factory=set)
 
