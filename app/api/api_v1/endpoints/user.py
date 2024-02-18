@@ -1,10 +1,8 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import EmailStr
 
 from core.oauth import get_current_active_user, is_staff_user
-from crud.user import get_user, update_user, update_user_is_staff
+from crud.user import update_user, update_user_is_staff
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.user import (
     User,
