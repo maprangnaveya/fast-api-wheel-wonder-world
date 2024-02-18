@@ -1,9 +1,8 @@
-from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
-from core.oauth import get_current_active_user, get_current_user_for_db
+from core.oauth import get_current_user_for_db
 from crud.broker import (
     create_broker,
     get_broker,
@@ -12,7 +11,7 @@ from crud.broker import (
 )
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.broker import BrokerForUpdate, BrokerIn, BrokerOut
-from models.user import User, UserForDB
+from models.user import UserForDB
 
 router = APIRouter()
 

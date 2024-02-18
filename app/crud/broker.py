@@ -1,7 +1,7 @@
 from datetime import datetime
 from bson import ObjectId
 from fastapi import HTTPException, status
-from pydantic import EmailStr
+
 from core.global_settings import settings
 from crud.user import get_user_by_id
 from db.mongodb import AsyncIOMotorClient
