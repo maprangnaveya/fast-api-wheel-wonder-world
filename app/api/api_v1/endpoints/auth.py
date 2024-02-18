@@ -1,7 +1,9 @@
+from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
+from core.jwttoken import create_access_token
 from crud.shortcuts import check_is_email_does_exists
 from crud.user import create_user, get_user
 from db.mongodb import get_database, AsyncIOMotorClient
@@ -24,11 +26,10 @@ async def login(
             detail="Your email or password incorrect",
         )
 
-    # access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    # token = create_access_token(
-    #     data={"username": dbuser.username}, expires_delta=access_token_expires
-    # )
-    return UserForResponse(user=User(**dbuser.model_dump(), token="faketoken"))
+    token = create_access_token(
+        data={"email": dbuser.email}, expires_delta=timedelta(days=1)
+    )
+    return UserForResponse(user=User(**dbuser.model_dump(), token=token))
 
 
 @router.post(
