@@ -1,9 +1,10 @@
 from datetime import datetime
 from bson import ObjectId
+from fastapi import HTTPException, status
+from pydantic import EmailStr
 from core.global_settings import settings
 from db.mongodb import AsyncIOMotorClient
 from models.broker import BrokerForDB, BrokerIn, BrokerForUpdate
-from models.user import UserForDB, UserForCreate, UserForUpdate
 
 
 async def get_broker(connection: AsyncIOMotorClient, broker_id: str) -> BrokerForDB:  # type: ignore
@@ -26,11 +27,19 @@ async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> 
 
 
 async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # type: ignore
-    inserted_broker = await connection[settings.mongo_db][
-        settings.brokers_collection_name
-    ].insert_one(broker.model_dump())
 
-    return BrokerForDB(**broker.model_dump(), id=inserted_broker.inserted_id)
+    broker.emails = list(broker.emails)
+    broker.mobile_phones = list(broker.mobile_phones)
+    broker.branches = list(broker.branches)
+
+    collection = connection[settings.mongo_db][settings.brokers_collection_name]
+
+    new_broker = await collection.insert_one(
+        broker.model_dump(by_alias=True, exclude=["id"])
+    )
+
+    created_broker = await collection.find_one({"_id": new_broker.inserted_id})
+    return BrokerForDB(**created_broker)
 
 
 async def update_broker(connection: AsyncIOMotorClient, broker: BrokerForUpdate):  # type: ignore
