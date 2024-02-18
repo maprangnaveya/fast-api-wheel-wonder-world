@@ -28,7 +28,7 @@ class BrokerForDB(DBModelMixin, BaseBrokerWithUser):
     pass
 
 
-class BrokerOut(BaseBroker):
+class BrokerOut(DBModelMixin, BaseBroker):
     pass
 
 
