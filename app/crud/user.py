@@ -48,7 +48,6 @@ async def create_user(connection: AsyncIOMotorClient, user: UserForCreate) -> Us
 async def update_user(connection: AsyncIOMotorClient, email: EmailStr, user: UserForUpdate) -> UserForDB:  # type: ignore
     db_user = await get_user(connection, email)
 
-    db_user.email = user.email or db_user.email
     db_user.name = user.name or db_user.name
     if user.password:
         db_user.change_password(user.password)
