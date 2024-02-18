@@ -67,7 +67,7 @@ async def create_new_car(
             return CarOut(**db_car.model_dump())
 
 
-@router.patch("/cars/{car_id}", response_model=CarOut, tags=tags)
+@router.post("/cars/{car_id}", response_model=CarOut, tags=tags)
 async def update_car_by_id(
     car_id: str,
     car_update: CarInUpdate = Body(embed=True),

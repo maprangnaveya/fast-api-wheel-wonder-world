@@ -53,7 +53,7 @@ async def create_new_broker(
             return BrokerOut(**db_broker.model_dump())
 
 
-@router.patch("/brokers/{broker_id}", response_model=BrokerOut, tags=tags)
+@router.post("/brokers/{broker_id}", response_model=BrokerOut, tags=tags)
 async def update_broker_by_id(
     broker_id: str,
     updated_broker: BrokerForUpdate = Body(embed=True),
