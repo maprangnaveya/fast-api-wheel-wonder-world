@@ -1,5 +1,6 @@
 from datetime import datetime
 from bson import ObjectId
+from fastapi import HTTPException, status
 from pydantic import EmailStr
 
 from core.global_settings import settings
@@ -16,13 +17,18 @@ async def get_user_by_id(connection: AsyncIOMotorClient, id: str) -> UserInDB:  
         return UserInDB(**row)
 
 
-async def get_user(connection: AsyncIOMotorClient, email: EmailStr) -> UserInDB:  # type: ignore
+async def get_user(connection: AsyncIOMotorClient, email: EmailStr, raise_exception: bool = False) -> UserInDB:  # type: ignore
     row = await connection[settings.mongo_db][settings.users_collection_name].find_one(
         {"email": email}
     )
     print(f">>> get_user row: {row}")
     if row:
         return UserInDB(**row)
+    elif raise_exception:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User does not found",
+        )
 
 
 async def create_user(connection: AsyncIOMotorClient, user: UserForCreate) -> UserInDB:  # type: ignore
@@ -56,5 +62,23 @@ async def update_user(connection: AsyncIOMotorClient, email: EmailStr, user: Use
 
     _updated_at = await connection[settings.mongo_db][
         settings.users_collection_name
-    ].update_one({"email": db_user.email}, {"$set": db_user.model_dump()})
+    ].update_one(
+        {"email": db_user.email},
+        {"$set": db_user.model_dump(by_alias=True, exclude=["id", "email"])},
+    )
+    return db_user
+
+
+async def update_user_is_staff(connection: AsyncIOMotorClient, email: EmailStr, is_staff: bool) -> UserInDB:  # type: ignore
+    db_user = await get_user(connection, email, raise_exception=True)
+
+    db_user.is_staff = is_staff
+    db_user.updated_at = datetime.utcnow()
+
+    _updated_at = await connection[settings.mongo_db][
+        settings.users_collection_name
+    ].update_one(
+        {"email": db_user.email},
+        {"$set": db_user.model_dump(by_alias=True, exclude=["id", "email"])},
+    )
     return db_user
