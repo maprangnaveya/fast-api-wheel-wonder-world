@@ -47,9 +47,8 @@ async def register(
     async with await db.start_session() as s:
         async with s.start_transaction():
             dbuser = await create_user(db, user)
-            # access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-            # token = create_access_token(
-            #     data={"username": dbuser.username}, expires_delta=access_token_expires
-            # )
+            token = create_access_token(
+                data={"email": dbuser.email}, expires_delta=timedelta(days=1)
+            )
 
-            return UserForResponse(user=User(**dbuser.model_dump(), token="faketoken"))
+            return UserForResponse(user=User(**dbuser.model_dump(), token=token))
