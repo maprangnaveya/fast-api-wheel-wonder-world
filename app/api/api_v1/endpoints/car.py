@@ -89,9 +89,10 @@ async def update_car_by_id(
     current_user: UserInDB = Depends(get_current_user_for_db),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
-    # TODO: Is staff or broker user
+
     current_car = await get_car(db, car_id, raise_exception=True)
-    await check_is_owner_car(db, current_user=current_user, current_car=current_car)
+    if not current_user.is_staff:
+        await check_is_owner_car(db, current_user=current_user, current_car=current_car)
 
     updated_car = await update_car_with_db_car(db, car_update, current_car)
     return CarOut(**updated_car.model_dump())
@@ -104,8 +105,8 @@ async def delete_car_by_id(
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     current_car = await get_car(db, car_id, raise_exception=True)
-    # TODO: Is staff or broker user
-    await check_is_owner_car(db, current_user=current_user, current_car=current_car)
+    if not current_user.is_staff:
+        await check_is_owner_car(db, current_user=current_user, current_car=current_car)
 
     deleted_count = await delete_car(db, car_id)
     if deleted_count == 1:
