@@ -69,10 +69,9 @@ async def update_car_with_db_car(connection: AsyncIOMotorClient, car: CarIn, db_
     db_car.color = car.color or db_car.color
     db_car.mileage = car.mileage or db_car.mileage
     db_car.status = car.status or db_car.status
+    db_car.offer_price = car.offer_price or db_car.offer_price
 
     db_car.updated_at = datetime.utcnow()
-
-    data = db_car.model_dump(by_alias=True, exclude=["id", "broker_id"])
 
     collection = get_collection_cars(connection)
 

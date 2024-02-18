@@ -17,6 +17,7 @@ class BaseCar(RWModel):
     year: int | None = Field(default_factory=None)
     color: str = Field(...)
     mileage: float = Field(default_factory=0.0)
+    offer_price: float = Field(default=0.0)
     status: Status = Field(default=Status.INACTIVE)
 
 
