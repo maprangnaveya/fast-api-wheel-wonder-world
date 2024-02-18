@@ -1,8 +1,19 @@
+from datetime import datetime
+from bson import ObjectId
 from pydantic import EmailStr
 
 from core.global_settings import settings
 from db.mongodb import AsyncIOMotorClient
 from models.user import UserForDB, UserForCreate, UserForUpdate
+
+
+async def get_user_by_id(connection: AsyncIOMotorClient, id: str) -> UserForDB:  # type: ignore
+    row = await connection[settings.mongo_db][settings.users_collection_name].find_one(
+        {"_id": ObjectId(id)}
+    )
+    print(f">>> get_user row: {row}")
+    if row:
+        return UserForDB(**row)
 
 
 async def get_user(connection: AsyncIOMotorClient, email: EmailStr) -> UserForDB:  # type: ignore

@@ -5,15 +5,15 @@ from fastapi.security import OAuth2PasswordBearer
 from core.jwttoken import verify_token
 from crud.user import get_user
 from db.mongodb import get_database, AsyncIOMotorClient
-from models.user import User
+from models.user import User, UserForDB
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
 
-async def get_current_user(
+async def get_current_user_for_db(
     db: AsyncIOMotorClient = Depends(get_database), token: str = Depends(oauth2_scheme)  # type: ignore
-) -> User:
+) -> UserForDB:
 
     print(f">>> get_current_user token: {token}")
     credentials_exception = HTTPException(
@@ -29,6 +29,14 @@ async def get_current_user(
             detail="User not found",
         )
 
+    return db_user
+
+
+async def get_current_user(
+    db: AsyncIOMotorClient = Depends(get_database), token: str = Depends(oauth2_scheme)  # type: ignore
+) -> User:
+
+    db_user = await get_current_user_for_db(db, token)
     user = User(**db_user.model_dump(), token=token)
     return user
 
