@@ -32,7 +32,6 @@ class Settings(BaseSettings):
     jwt_secret_key: str = os.getenv(
         "SECRET_KEY", "03850f6de136cbfbac0ffb32e35cfde826d262c5d117331de42e418ddf7b02ea"
     )
-    jwt_token_prefix: str = os.getenv("JWT_TOKEN_PREFIX", "Token")
 
 
 settings = Settings()
