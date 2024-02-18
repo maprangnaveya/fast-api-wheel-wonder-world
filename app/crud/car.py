@@ -28,8 +28,11 @@ async def get_car(connection: AsyncIOMotorClient, car_id: str, raise_exception: 
         )
 
 
-async def get_cars(connection: AsyncIOMotorClient) -> list[CarForDB]:  # type: ignore
-    rows = await get_collection_cars(connection).find({}).to_list(length=None)
+async def get_cars(connection: AsyncIOMotorClient, query: dict | None = None) -> list[CarForDB]:  # type: ignore
+    if query is None:
+        query = {}
+
+    rows = await get_collection_cars(connection).find(query).to_list(length=None)
     return [CarForDB(**car) for car in rows]
 
 

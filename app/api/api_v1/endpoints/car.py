@@ -18,7 +18,7 @@ from crud.car import (
     update_car_with_db_car,
 )
 from db.mongodb import get_database, AsyncIOMotorClient
-from models.car import CarForDB, CarIn, CarInUpdate, CarOut
+from models.car import CarForDB, CarIn, CarInUpdate, CarOut, Status
 from models.user import UserForDB
 
 router = APIRouter()
@@ -38,9 +38,14 @@ async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarFor
 
 @router.get("/cars", response_model=list[CarOut], tags=tags)
 async def get_all_cars(
+    status: Status = None,
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
-    cars = await get_cars(db)
+    query = {}
+    if status:
+        query["status"] = status.value
+
+    cars = await get_cars(db, query=query)
     return [CarOut(**car.model_dump()) for car in cars]
 
 
