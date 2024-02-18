@@ -21,7 +21,7 @@ class BaseBroker(RWModel):
 
 
 class BaseBrokerWithUser(BaseBroker):
-    user: PyObjectId = Field(...)
+    user_id: PyObjectId = Field(...)
 
 
 class BrokerForDB(DBModelMixin, BaseBrokerWithUser):
