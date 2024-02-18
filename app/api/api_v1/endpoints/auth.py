@@ -2,16 +2,39 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 from core.jwttoken import create_access_token
 from crud.shortcuts import check_is_email_does_exists
 from crud.user import create_user, get_user
 from db.mongodb import get_database, AsyncIOMotorClient
+from models.jwttoken import Token
 from models.user import User, UserForCreate, UserForLogin, UserForResponse
 
 router = APIRouter()
 
 tags = ["authentication"]
+
+
+# TODO: Refactor this
+# for swagger
+@router.post("/auth/token")
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+) -> Token:
+
+    dbuser = await get_user(db, form_data.username)
+    if not dbuser or not dbuser.check_password(form_data.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your email or password incorrect",
+        )
+
+    token = create_access_token(
+        data={"email": dbuser.email}, expires_delta=timedelta(days=1)
+    )
+    return Token(access_token=token, token_type="bearer")
 
 
 @router.post("/auth/login", response_model=UserForResponse, tags=tags)
