@@ -17,6 +17,7 @@ from crud.car import (
     get_cars,
     update_car_with_db_car,
 )
+from crud.shortcuts import get_bson_object_id
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.car import CarForDB, CarIn, CarInUpdate, CarOut, Status
 from models.user import UserForDB
@@ -39,11 +40,15 @@ async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarFor
 @router.get("/cars", response_model=list[CarOut], tags=tags)
 async def get_all_cars(
     status: Status = None,
+    broker_id: str = None,
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
     query = {}
     if status:
         query["status"] = status.value
+
+    if broker_id:
+        query["broker_id"] = get_bson_object_id(broker_id)
 
     cars = await get_cars(db, query=query)
     return [CarOut(**car.model_dump()) for car in cars]
