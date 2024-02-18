@@ -9,6 +9,7 @@ from .read_write_model import RWModel
 class BaseUser(RWModel):
     email: EmailStr = Field(...)
     name: str = Field(alias="full_name")
+    disabled: bool = Field(default=False)
 
 
 class UserForDB(DBModelMixin, BaseUser):
