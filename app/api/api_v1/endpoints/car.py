@@ -82,7 +82,12 @@ async def create_new_car(
             return CarOut(**db_car.model_dump())
 
 
-@router.post("/cars/{car_id}", response_model=CarOut, tags=tags)
+@router.post(
+    "/cars/{car_id}",
+    response_model=CarOut,
+    tags=tags,
+    description="Allow only staff and car owner broker to do this action",
+)
 async def update_car_by_id(
     car_id: str,
     car_update: CarInUpdate = Body(embed=True),
@@ -98,7 +103,12 @@ async def update_car_by_id(
     return CarOut(**updated_car.model_dump())
 
 
-@router.delete("/cars/{car_id}", tags=tags, status_code=204)
+@router.delete(
+    "/cars/{car_id}",
+    tags=tags,
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Allow only staff and car owner broker to do this action",
+)
 async def delete_car_by_id(
     car_id: str,
     current_user: UserInDB = Depends(get_current_user_for_db),
