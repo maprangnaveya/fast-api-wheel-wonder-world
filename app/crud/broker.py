@@ -9,7 +9,7 @@ from models.user import UserForDB, UserForCreate, UserForUpdate
 async def get_broker(connection: AsyncIOMotorClient, broker_id: str) -> BrokerForDB:  # type: ignore
     row = await connection[settings.mongo_db][
         settings.brokers_collection_name
-    ].find_one({"_id": broker_id})
+    ].find_one({"_id": ObjectId(broker_id)})
     print(f">>> get_broker row: {row}")
     if row:
         return BrokerForDB(**row)
