@@ -51,3 +51,23 @@ async def create_new_car(
 
             return CarOut(**db_car.model_dump())
 
+
+@router.patch("/card/{car_id}", response_model=CarOut, tags=tags)
+async def update_car_by_id(
+    car_id: str,
+    car_update: CarInUpdate = Body(embed=True),
+    current_user: UserForDB = Depends(get_current_user_for_db),
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+):
+    # TODO: Is staff or broker user
+    current_car = await get_car(db, car_id, raise_exception=True)
+    brokers_of_user = await get_brokers_for_user(db, current_user.id)
+    brokers_id_of_user = [broker.id for broker in brokers_of_user]
+    if current_car.broker_id not in brokers_id_of_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only car's broker can do this action",
+        )
+
+    updated_car = await update_car_with_db_car(db, car_update, current_car)
+    return CarOut(**updated_car.model_dump())

@@ -61,6 +61,32 @@ async def create_car_for_broker(connection: AsyncIOMotorClient, car_in: CarIn): 
     created_car = await collection.find_one({"_id": new_car.inserted_id})
     return CarForDB(**created_car)
 
-    )
-    return db_car
 
+async def update_car_with_db_car(connection: AsyncIOMotorClient, car: CarIn, db_car: CarForDB):  # type: ignore
+    db_car.brand = car.brand or db_car.brand
+    db_car.model = car.model or db_car.model
+    db_car.year = car.year or db_car.year
+    db_car.color = car.color or db_car.color
+    db_car.mileage = car.mileage or db_car.mileage
+    db_car.status = car.status or db_car.status
+
+    db_car.updated_at = datetime.utcnow()
+
+    data = db_car.model_dump(by_alias=True, exclude=["id", "broker_id"])
+
+    collection = get_collection_cars(connection)
+
+    await connection[settings.mongo_db][settings.cars_collection_name].update_one(
+        {"_id": ObjectId(db_car.id)},
+        {"$set": db_car.model_dump(by_alias=True, exclude=["id", "broker_id"])},
+    )
+    updated_car = await collection.find_one({"_id": ObjectId(db_car.id)})
+    return CarForDB(**updated_car)
+
+
+async def delete_car(connection: AsyncIOMotorClient, id: str) -> int:  # type: ignore
+    delete_result = await get_collection_cars(connection).delete_one(
+        {"_id": get_bson_object_id(id)}
+    )
+
+    return delete_result.deleted_count
