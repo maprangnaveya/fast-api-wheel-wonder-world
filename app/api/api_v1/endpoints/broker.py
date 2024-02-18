@@ -13,6 +13,16 @@ router = APIRouter()
 
 tags = ["broker"]
 
+
+@router.get("/brokers/me", response_model=list[BrokerOut], tags=tags)
+async def get_brokers_for_request_user(
+    current_user: Annotated[UserForDB, Depends(get_current_user_for_db)],
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+):
+    brokers = await get_brokers_for_user(db, current_user.id)
+    return [BrokerOut(**broker.model_dump()) for broker in brokers]
+
+
 @router.get("/brokers/{broker_id}", response_model=BrokerOut, tags=tags)
 async def get_broker_by_id(
     broker_id: str,
