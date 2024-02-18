@@ -12,16 +12,19 @@ class Status(str, Enum):
 
 
 class BaseCar(RWModel):
-    broker_id: PyObjectId = Field(...)
     brand: str = Field(...)
     model: str = Field(...)
     year: int | None = Field(default_factory=None)
     color: str = Field(...)
     mileage: float = Field(default_factory=0.0)
-    status: Status = Field(default_factory=Status.INACTIVE)
+    status: Status = Field(default=Status.INACTIVE)
 
 
-class CarForDB(DBModelMixin, BaseCar):
+class BaseCarWithBroker(BaseCar):
+    broker_id: PyObjectId = Field(...)
+
+
+class CarForDB(DBModelMixin, BaseCarWithBroker):
     pass
 
 
@@ -29,5 +32,9 @@ class CarOut(CarForDB):
     pass
 
 
-class CarIn(BaseCar):
-    broker_id: PyObjectId | None = Field(default=None)
+class CarIn(BaseCarWithBroker):
+    pass
+
+
+class CarInUpdate(BaseCar):
+    pass
