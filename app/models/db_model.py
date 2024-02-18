@@ -17,5 +17,5 @@ class DBModelMixin(DateTimeModelMixin):
     # The primary key for the UserModel, stored as a `str` on the instance.
     # This will be aliased to `_id` when sent to MongoDB,
     # but provided as `id` in the API requests and responses.
-    # set `id` default value to `None`, so MongoDB will auto generate `id` for us? TODO:
+    # set `id` default value to `None`, so MongoDB will auto generate `id` for us
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
