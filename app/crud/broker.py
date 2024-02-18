@@ -9,10 +9,14 @@ from db.mongodb import AsyncIOMotorClient
 from models.broker import BrokerInDB, BrokerIn, BrokerForUpdate
 
 
+def get_collection_broker(connection: AsyncIOMotorClient):  # type: ignore
+    return connection[settings.mongo_db][settings.brokers_collection_name]
+
+
 async def get_broker(connection: AsyncIOMotorClient, broker_id: str, raise_exception: bool = False) -> BrokerInDB:  # type: ignore
-    row = await connection[settings.mongo_db][
-        settings.brokers_collection_name
-    ].find_one({"_id": get_bson_object_id(broker_id)})
+    row = await get_collection_broker(connection).find_one(
+        {"_id": get_bson_object_id(broker_id)}
+    )
     print(f">>> get_broker row: {row}")
     if row:
         return BrokerInDB(**row)
@@ -25,7 +29,7 @@ async def get_broker(connection: AsyncIOMotorClient, broker_id: str, raise_excep
 
 async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str, skip: int = 0, limit: int = 0) -> list[BrokerInDB]:  # type: ignore
     rows = (
-        await connection[settings.mongo_db][settings.brokers_collection_name]
+        await get_collection_broker(connection)
         .find({"user_id": ObjectId(user_id)})
         .skip(skip)
         .limit(limit)
@@ -49,7 +53,7 @@ async def create_broker(connection: AsyncIOMotorClient, broker_in: BrokerIn):  #
     broker.mobile_phones = list(broker.mobile_phones)
     broker.branches = list(broker.branches)
 
-    collection = connection[settings.mongo_db][settings.brokers_collection_name]
+    collection = get_collection_broker(connection)
 
     new_broker = await collection.insert_one(
         broker.model_dump(by_alias=True, exclude=["id"])
@@ -66,7 +70,7 @@ async def update_broker_with_db_broker(connection: AsyncIOMotorClient, broker: B
     db_broker.updated_at = datetime.utcnow()
     db_broker.user_id = ObjectId(db_broker.id)
 
-    await connection[settings.mongo_db][settings.brokers_collection_name].update_one(
+    await get_collection_broker(connection).update_one(
         {"_id": ObjectId(db_broker.id)},
         {"$set": db_broker.model_dump(by_alias=True, exclude=["id", "user_id"])},
     )
@@ -81,8 +85,8 @@ async def update_broker(connection: AsyncIOMotorClient, broker: BrokerForUpdate)
 
 
 async def delete_broker(connection: AsyncIOMotorClient, id: str) -> int:  # type: ignore
-    delete_result = await connection[settings.mongo_db][
-        settings.brokers_collection_name
-    ].delete_one({"_id": ObjectId(id)})
+    delete_result = await get_collection_broker(connection).delete_one(
+        {"_id": ObjectId(id)}
+    )
 
     return delete_result.deleted_count

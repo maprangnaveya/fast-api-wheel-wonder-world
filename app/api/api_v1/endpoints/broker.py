@@ -44,7 +44,12 @@ async def get_broker_by_id(
     return BrokerOut(**broker.model_dump())
 
 
-@router.post("/brokers", response_model=BrokerOut, tags=tags)
+@router.post(
+    "/brokers",
+    response_model=BrokerOut,
+    tags=tags,
+    description="Leave `user_id` empty to create new broker for request user",
+)
 async def create_new_broker(
     broker: BrokerIn = Body(embed=True),
     current_user: UserInDB = Depends(get_current_user_for_db),
