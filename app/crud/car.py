@@ -5,9 +5,7 @@ from fastapi import HTTPException, status
 from core.global_settings import settings
 from crud.broker import get_broker
 from crud.shortcuts import get_bson_object_id
-from crud.user import get_user_by_id
 from db.mongodb import AsyncIOMotorClient
-from models.broker import BrokerIn, BrokerForUpdate
 from models.car import CarForDB, CarIn
 
 
@@ -28,11 +26,21 @@ async def get_car(connection: AsyncIOMotorClient, car_id: str, raise_exception: 
         )
 
 
-async def get_cars(connection: AsyncIOMotorClient, query: dict | None = None) -> list[CarForDB]:  # type: ignore
+async def get_cars(connection: AsyncIOMotorClient, query: dict | None = None, skip: int = 0, limit: int | None = None) -> list[CarForDB]:  # type: ignore
     if query is None:
         query = {}
 
-    rows = await get_collection_cars(connection).find(query).to_list(length=None)
+    if limit is None:
+        rows = await get_collection_cars(connection).find(query).to_list(length=None)
+    else:
+        rows = (
+            await get_collection_cars(connection)
+            .find(query)
+            .skip(skip)
+            .limit(limit)
+            .to_list(length=None)
+        )
+
     return [CarForDB(**car) for car in rows]
 
 
