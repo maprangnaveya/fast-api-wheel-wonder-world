@@ -3,6 +3,7 @@ from bson import ObjectId
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 from core.global_settings import settings
+from crud.user import get_user_by_id
 from db.mongodb import AsyncIOMotorClient
 from models.broker import BrokerForDB, BrokerIn, BrokerForUpdate
 
@@ -27,6 +28,14 @@ async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> 
 
 
 async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # type: ignore
+
+    user = await get_user_by_id(connection, broker.user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Broker's user does not found",
+        )
 
     broker.emails = list(broker.emails)
     broker.mobile_phones = list(broker.mobile_phones)
