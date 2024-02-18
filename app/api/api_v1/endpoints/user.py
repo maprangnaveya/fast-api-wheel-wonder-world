@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import EmailStr
 
-from core.oauth import get_current_active_user
+from core.oauth import get_current_active_user, is_staff_user
 from crud.user import get_user, update_user, update_user_is_staff
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.user import (
@@ -38,10 +38,6 @@ async def update_user_is_staff_status(
     current_user: User = Depends(get_current_active_user),
     db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
 ):
-    if not current_user.is_staff:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not allow to do this action",
-        )
+    is_staff_user()
     updated_user = await update_user_is_staff(db, user_email, is_staff)
     return User(**updated_user.model_dump())
