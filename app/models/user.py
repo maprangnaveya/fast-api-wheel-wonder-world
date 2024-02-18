@@ -8,7 +8,9 @@ from .read_write_model import RWModel
 
 class BaseUser(RWModel):
     email: EmailStr = Field(...)
+    # email: EmailStr = Field(unique=True, index=True)
     name: str = Field(alias="full_name")
+    is_staff: bool = Field(default=False)
     disabled: bool = Field(default=False)
 
 
