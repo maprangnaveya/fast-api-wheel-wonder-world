@@ -10,7 +10,7 @@ from crud.car import (
     get_cars,
     update_car_with_db_car,
 )
-from crud.shortcuts import get_bson_object_id
+from crud.shortcuts import get_bson_object_id, get_total_skip_from_page_number
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.car import CarForDB, CarIn, CarInUpdate, CarOut, Status
 from models.user import UserForDB
@@ -49,9 +49,13 @@ async def get_all_cars_by_status_broker_id(
 
     if broker_id:
         query["broker_id"] = get_bson_object_id(broker_id)
-    skip = (page - 1) * page_size
 
-    cars = await get_cars(db, query=query, skip=skip, limit=page_size)
+    cars = await get_cars(
+        db,
+        query=query,
+        skip=get_total_skip_from_page_number(page=page, page_size=page_size),
+        limit=page_size,
+    )
     return [CarOut(**car.model_dump()) for car in cars]
 
 
