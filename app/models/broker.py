@@ -13,3 +13,20 @@ class BaseBranch(RWModel):
 class BranchForDB(DBModelMixin, BaseBranch):
     pass
 
+
+class BaseBroker(RWModel):
+    emails: set[str] = Field(default_factory=set)
+    mobile_phones: set[str] = Field(default_factory=set)
+    branches: set[PyObjectId] = Field(default_factory=set)
+
+
+class BaseBrokerWithUser(BaseBroker):
+    user: PyObjectId = Field(...)
+
+
+class BrokerForDB(DBModelMixin, BaseBrokerWithUser):
+    pass
+
+
+class BrokerOut(BaseBroker):
+    pass
