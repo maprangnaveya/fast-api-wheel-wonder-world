@@ -9,12 +9,18 @@ from models.broker import BrokerForDB, BrokerIn, BrokerForUpdate
 
 
 async def get_broker(connection: AsyncIOMotorClient, broker_id: str) -> BrokerForDB:  # type: ignore
-    row = await connection[settings.mongo_db][
-        settings.brokers_collection_name
-    ].find_one({"_id": ObjectId(broker_id)})
-    print(f">>> get_broker row: {row}")
-    if row:
-        return BrokerForDB(**row)
+    try:
+        row = await connection[settings.mongo_db][
+            settings.brokers_collection_name
+        ].find_one({"_id": ObjectId(broker_id)})
+        print(f">>> get_broker row: {row}")
+        if row:
+            return BrokerForDB(**row)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Broker does not found",
+        )
 
 
 async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> list[BrokerForDB]:  # type: ignore

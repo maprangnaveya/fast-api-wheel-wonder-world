@@ -13,6 +13,15 @@ router = APIRouter()
 
 tags = ["broker"]
 
+@router.get("/brokers/{broker_id}", response_model=BrokerOut, tags=tags)
+async def get_broker_by_id(
+    broker_id: str,
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+):
+    broker = await get_broker(db, broker_id)
+    return BrokerOut(**broker.model_dump())
+
+
 @router.post("/brokers", response_model=BrokerOut, tags=tags)
 async def create_new_broker(
     broker: BrokerIn = Body(embed=True),
