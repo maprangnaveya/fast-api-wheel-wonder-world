@@ -12,13 +12,22 @@ from crud.broker import (
 )
 from crud.car import create_car_for_broker, get_car, get_cars, update_car_with_db_car
 from db.mongodb import get_database, AsyncIOMotorClient
-from models.broker import BrokerForUpdate, BrokerIn, BrokerOut
-from models.car import CarIn, CarInUpdate, CarOut
+from models.car import CarForDB, CarIn, CarInUpdate, CarOut
 from models.user import UserForDB
 
 router = APIRouter()
 
 tags = ["car"]
+
+
+async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarForDB):
+    brokers_of_user = await get_brokers_for_user(db, current_user.id)
+    brokers_id_of_user = [broker.id for broker in brokers_of_user]
+    if current_car.broker_id not in brokers_id_of_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only car's broker can do this action",
+        )
 
 
 @router.get("/cars", response_model=list[CarOut], tags=tags)
@@ -61,13 +70,7 @@ async def update_car_by_id(
 ):
     # TODO: Is staff or broker user
     current_car = await get_car(db, car_id, raise_exception=True)
-    brokers_of_user = await get_brokers_for_user(db, current_user.id)
-    brokers_id_of_user = [broker.id for broker in brokers_of_user]
-    if current_car.broker_id not in brokers_id_of_user:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only car's broker can do this action",
-        )
+    await check_is_owner_car(db, current_user=current_user, current_car=current_car)
 
     updated_car = await update_car_with_db_car(db, car_update, current_car)
     return CarOut(**updated_car.model_dump())
