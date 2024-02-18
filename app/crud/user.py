@@ -52,8 +52,9 @@ async def update_user(connection: AsyncIOMotorClient, email: EmailStr, user: Use
     if user.password:
         db_user.change_password(user.password)
 
+    db_user.updated_at = datetime.utcnow()
+
     updated_at = await connection[settings.mongo_db][
         settings.users_collection_name
     ].update_one({"email": db_user.email}, {"$set": db_user.model_dump()})
-    db_user.updated_at = updated_at
     return db_user
