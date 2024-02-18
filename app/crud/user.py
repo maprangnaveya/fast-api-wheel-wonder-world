@@ -62,5 +62,23 @@ async def update_user(connection: AsyncIOMotorClient, email: EmailStr, user: Use
 
     _updated_at = await connection[settings.mongo_db][
         settings.users_collection_name
-    ].update_one({"email": db_user.email}, {"$set": db_user.model_dump()})
+    ].update_one(
+        {"email": db_user.email},
+        {"$set": db_user.model_dump(by_alias=True, exclude=["id", "email"])},
+    )
+    return db_user
+
+
+async def update_user_is_staff(connection: AsyncIOMotorClient, email: EmailStr, is_staff: bool) -> UserInDB:  # type: ignore
+    db_user = await get_user(connection, email, raise_exception=True)
+
+    db_user.is_staff = is_staff
+    db_user.updated_at = datetime.utcnow()
+
+    _updated_at = await connection[settings.mongo_db][
+        settings.users_collection_name
+    ].update_one(
+        {"email": db_user.email},
+        {"$set": db_user.model_dump(by_alias=True, exclude=["id", "email"])},
+    )
     return db_user
