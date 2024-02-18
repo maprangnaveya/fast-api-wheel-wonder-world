@@ -4,7 +4,12 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from core.oauth import get_current_active_user, get_current_user_for_db
-from crud.broker import create_broker, get_broker, get_brokers_for_user
+from crud.broker import (
+    create_broker,
+    get_broker,
+    get_brokers_for_user,
+    update_broker_with_db_broker,
+)
 from db.mongodb import get_database, AsyncIOMotorClient
 from models.broker import BrokerForUpdate, BrokerIn, BrokerOut
 from models.user import User, UserForDB
@@ -46,3 +51,24 @@ async def create_new_broker(
             db_broker = await create_broker(db, broker)
 
             return BrokerOut(**db_broker.model_dump())
+
+
+@router.patch("/brokers/{broker_id}", response_model=BrokerOut, tags=tags)
+async def update_broker_by_id(
+    broker_id: str,
+    updated_broker: BrokerForUpdate = Body(embed=True),
+    current_user: UserForDB = Depends(get_current_user_for_db),
+    db: AsyncIOMotorClient = Depends(get_database),  # type: ignore
+):
+    current_broker = await get_broker(db, broker_id)
+
+    if current_broker.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only owner broker can do this action",
+        )
+
+    updated_broker = await update_broker_with_db_broker(
+        db, updated_broker, current_broker
+    )
+    return BrokerOut(**updated_broker.model_dump())

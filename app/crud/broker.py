@@ -24,7 +24,6 @@ async def get_broker(connection: AsyncIOMotorClient, broker_id: str) -> BrokerFo
 
 
 async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> list[BrokerForDB]:  # type: ignore
-
     rows = (
         await connection[settings.mongo_db][settings.brokers_collection_name]
         .find({"user_id": ObjectId(user_id)})
@@ -34,7 +33,6 @@ async def get_brokers_for_user(connection: AsyncIOMotorClient, user_id: str) -> 
 
 
 async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # type: ignore
-
     user = await get_user_by_id(connection, broker.user_id)
 
     if not user:
@@ -58,12 +56,10 @@ async def create_broker(connection: AsyncIOMotorClient, broker: BrokerIn):  # ty
     return BrokerForDB(**created_broker)
 
 
-async def update_broker(connection: AsyncIOMotorClient, broker: BrokerForUpdate):  # type: ignore
-    db_broker = await get_broker(connection, broker.id)
-
-    db_broker.emails = broker.emails or db_broker.emails
-    db_broker.mobile_phones = broker.mobile_phones or db_broker.mobile_phones
-    db_broker.branches = broker.branches or db_broker.branches
+async def update_broker_with_db_broker(connection: AsyncIOMotorClient, broker: BrokerForUpdate, db_broker: BrokerForDB):  # type: ignore
+    db_broker.emails = list(broker.emails or db_broker.emails)
+    db_broker.mobile_phones = list(broker.mobile_phones or db_broker.mobile_phones)
+    db_broker.branches = list(broker.branches or db_broker.branches)
     db_broker.updated_at = datetime.utcnow()
 
     await connection[settings.mongo_db][settings.brokers_collection_name].update_one(
@@ -71,6 +67,12 @@ async def update_broker(connection: AsyncIOMotorClient, broker: BrokerForUpdate)
     )
     print(f">> updated db_broker: {db_broker}")
     return db_broker
+
+
+async def update_broker(connection: AsyncIOMotorClient, broker: BrokerForUpdate):  # type: ignore
+    db_broker = await get_broker(connection, broker.id)
+
+    return update_broker_with_db_broker(connection, broker, db_broker)
 
 
 async def delete_broker(connection: AsyncIOMotorClient, id: str) -> int:  # type: ignore
