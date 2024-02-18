@@ -12,7 +12,7 @@ from crud.car import (
 )
 from crud.shortcuts import get_bson_object_id, get_total_skip_from_page_number
 from db.mongodb import get_database, AsyncIOMotorClient
-from models.car import CarForDB, CarIn, CarInUpdate, CarOut, Status
+from models.car import CarInDB, CarIn, CarInUpdate, CarOut, Status
 from models.user import UserForDB
 
 router = APIRouter()
@@ -20,7 +20,7 @@ router = APIRouter()
 tags = ["car"]
 
 
-async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarForDB):
+async def check_is_owner_car(db, *, current_user: UserForDB, current_car: CarInDB):
     brokers_of_user = await get_brokers_for_user(db, current_user.id)
     brokers_id_of_user = [broker.id for broker in brokers_of_user]
     if current_car.broker_id not in brokers_id_of_user:

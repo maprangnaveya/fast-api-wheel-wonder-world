@@ -25,11 +25,11 @@ class BaseCarWithBroker(BaseCar):
     broker_id: PyObjectId = Field(...)
 
 
-class CarForDB(DBModelMixin, BaseCarWithBroker):
+class CarInDB(DBModelMixin, BaseCarWithBroker):
     pass
 
 
-class CarOut(CarForDB):
+class CarOut(CarInDB):
     pass
 
 
